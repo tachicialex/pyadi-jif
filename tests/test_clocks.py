@@ -6,6 +6,59 @@ from gekko import GEKKO  # type: ignore
 
 import adijif
 
+@pytest.mark.parametrize("solver", ["gekko", "CPLEX"])
+def test_ad9545_validate_fail(solver):
+
+    msg = r"Solution Not Found"
+
+    with pytest.raises(Exception, match=msg):
+        clk = adijif.ad9545(solver=solver)
+
+        clk.avoid_min_max_PLL_rates = True
+        clk.minimize_input_dividers = True
+
+        input_refs = [1, 44e6, 0, 0]
+        output_clocks = [3072465456, 0, 0 , 0, 0, 0, 0 ,0 ,0, 0]
+
+        input_refs = list(map(int, input_refs))  # force to be ints
+        output_clocks = list(map(int, output_clocks))  # force to be ints
+
+        clk.set_requested_clocks(input_refs, output_clocks)
+
+        clk.solve()
+
+@pytest.mark.parametrize("solver", ["gekko", "CPLEX"])
+def test_ad9545_validate_fail(solver):
+
+    clk = adijif.ad9545(solver=solver)
+
+    clk.avoid_min_max_PLL_rates = True
+    clk.minimize_input_dividers = True
+
+    input_refs = [1, 10e6, 0, 0]
+    output_clocks = [30720000, 0, 0 , 0, 0, 0, 0 ,0 ,0, 0]
+
+    input_refs = list(map(int, input_refs))  # force to be ints
+    output_clocks = list(map(int, output_clocks))  # force to be ints
+
+    clk.set_requested_clocks(input_refs, output_clocks)
+
+    clk.solve()
+
+def test_ad9545_fail_no_solver():
+
+    with pytest.raises(Exception, match=r"Unknown solver NAN"):
+        clk = adijif.ad9545(solver="NAN")
+
+        input_refs = [1, 10e6, 0, 0]
+        output_clocks = [30720000, 0, 0 , 0, 0, 0, 0 ,0 ,0, 0]
+
+        input_refs = list(map(int, input_refs))  # force to be ints
+        output_clocks = list(map(int, output_clocks))  # force to be ints
+
+        clk.set_requested_clocks(input_refs, output_clocks)
+
+        clk.solve()
 
 def test_ad9523_1_daq2_validate():
 
